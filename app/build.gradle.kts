@@ -1,10 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp")
-
-    id ("kotlin-kapt")
-    id ("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hiltAndroid)
 }
 
 android {
@@ -68,19 +66,18 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1-Beta")
+    implementation(libs.kotlinx.coroutines.android)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
+    implementation(libs.hilt.android)
     implementation(project(":foodie_api"))
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    ksp(libs.hilt.compiler)
 
     // Hilt with Compose для возможности создания hiltViewModel()
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Navigation
-    val nav_version = "2.7.7"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation(libs.androidx.navigation.compose)
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)
 //    androidTestImplementation(libs.androidx.espresso.core)
@@ -89,6 +86,6 @@ dependencies {
 //    debugImplementation(libs.androidx.ui.tooling)
 //    debugImplementation(libs.androidx.ui.test.manifest)
 }
-kapt {
-    correctErrorTypes = true
-}
+//kapt {
+//    correctErrorTypes = true
+//}

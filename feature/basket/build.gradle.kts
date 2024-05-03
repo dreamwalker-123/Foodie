@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id ("kotlin-kapt")
-    id ("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hiltAndroid)
 }
 
 android {
@@ -54,12 +54,12 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
+    implementation(libs.hilt.android)
     implementation(project(":foodie_api"))
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    ksp(libs.hilt.compiler)
 
     // Hilt with Compose для возможности создания hiltViewModel()
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
     // Compose
 //    implementation(libs.androidx.compose.ui)
 //    implementation(libs.androidx.compose.material3)
