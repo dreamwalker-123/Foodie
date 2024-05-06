@@ -53,9 +53,14 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(project(":foodie_api"))
+    implementation(project(":core:data"))
+    implementation(project(":core:ui"))
     ksp(libs.hilt.compiler)
 
     // Hilt with Compose для возможности создания hiltViewModel()

@@ -3,11 +3,7 @@ package com.example.foodie_api.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Products(
-    val list: List<ProductsItem>
-)
-@Serializable
-data class ProductsItem(
+data class Product(
     val carbohydrates_per_100_grams: Double,
     val category_id: Int,
     val description: String,

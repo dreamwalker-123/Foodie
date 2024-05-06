@@ -1,5 +1,8 @@
 package com.example.foodie
 
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,14 +14,19 @@ import com.example.catalog.CatalogScreen
 
 @Composable
 fun Navigation(
-    navController: NavHostController = rememberNavController()
+    windowSizeClass: WindowSizeClass,
+    navController: NavHostController = rememberNavController(),
 ) {
     NavHost(navController = navController, startDestination = "CatalogScreen") {
         composable("CatalogScreen") {
             CatalogScreen(
-//                onGoToItem = { id ->
-//                    navController.navigate("details/$id")
-//                }
+                columns = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                    GridCells.Fixed(4)
+                } else {
+                    GridCells.Fixed(2)
+                },
+                onProductClick = { navController.navigate("$PRODUCT_ROUTE/$id") },
+                onCartClick = { navController.navigate("CardProductScreen")}
             )
         }
         composable("CardProductScreen") {
@@ -49,6 +57,8 @@ fun Navigation(
 //        }
     }
 }
+
+private const val PRODUCT_ROUTE = "product_route"
 
 enum class Screens(name: String) {
     CATALOG("catalog"),

@@ -1,17 +1,15 @@
 package com.example.foodie_api
 
-import com.example.foodie_api.model.Categories
-import com.example.foodie_api.model.CategoriesItem
-import com.example.foodie_api.model.Products
-import com.example.foodie_api.model.ProductsItem
-import com.example.foodie_api.model.Tags
+import com.example.foodie_api.model.Category
+import com.example.foodie_api.model.Product
+import com.example.foodie_api.model.Tag
 import retrofit2.http.GET
 
 interface FoodieApi {
     @GET("Categories.json")
-    suspend fun getCategories(): List<CategoriesItem>
+    suspend fun getCategories(): List<Category>
     @GET("Tags.json")
-    suspend fun getTags(): List<CategoriesItem>
+    suspend fun getTags(): List<Tag>
     @GET("Products.json")
-    suspend fun getProducts(): List<ProductsItem>
+    suspend fun getProducts(): List<Product>
 }

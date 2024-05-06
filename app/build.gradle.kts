@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation(libs.androidx.material3.windowSizeClass)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
