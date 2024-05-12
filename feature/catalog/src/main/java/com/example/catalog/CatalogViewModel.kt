@@ -4,18 +4,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.repository.NetworkRepository
-import com.example.foodie_api.model.Category
-import com.example.foodie_api.model.Product
+import com.example.network.model.Category
+import com.example.network.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CatalogViewModel @Inject constructor(private val networkRepository: NetworkRepository) : ViewModel() {
-    private val _currentCategory = mutableStateOf<Category?>(null)
+class CatalogViewModel @Inject constructor(
+    private val networkRepository: NetworkRepository
+) : ViewModel() {
+    private val _currentCategory = mutableStateOf<com.example.network.model.Category?>(null)
     val currentCategory = _currentCategory
 
     private val _categoriesUiState: MutableStateFlow<CategoriesUiState> =
@@ -34,23 +36,23 @@ class CatalogViewModel @Inject constructor(private val networkRepository: Networ
         viewModelScope.launch {
             getProducts()
             getCategories()
-            getTags()
         }
     }
 
     fun getProducts() {
         viewModelScope.launch {
-            networkRepository.getProducts()
-                .onSuccess {
-                    _productsUiState.value = if (it.isEmpty()) {
-                        ProductsUiState.Empty
-                    } else {
-                        ProductsUiState.Success(it)
-                    }
-                }
-                .onFailure {
-                    _productsUiState.value = ProductsUiState.Error(it)
-                }
+            networkRepository.getProducts().map { result ->
+                result.fold(
+                    onSuccess = { cart ->
+                        if (cart.isNotEmpty()) {
+                            ProductsUiState.Success(cart)
+                        } else {
+                            ProductsUiState.Empty
+                        }
+                    },
+                    onFailure = { ProductsUiState.Error(it) }
+                )
+            }
         }
     }
 
@@ -70,35 +72,19 @@ class CatalogViewModel @Inject constructor(private val networkRepository: Networ
         }
     }
 
-    fun getTags() {
-        viewModelScope.launch {
-            networkRepository.getTags()
-                .onSuccess {
-                    _tagsUiState.value = if (it.isEmpty()) {
-                        TagUiState.Empty
-                    } else {
-                        TagUiState.Success(it)
-                    }
-                }
-                .onFailure {
-                    _tagsUiState.value = TagUiState.Error
-                }
-        }
-    }
-
-    fun updateCurrentCategory(category: Category) {
+    fun updateCurrentCategory(category: com.example.network.model.Category) {
         if (_currentCategory.value != category) {
             _currentCategory.value = category
         }
     }
 
-    fun addProductInCart(product: Product) {
+    fun addProductInCart(product: com.example.network.model.Product) {
         viewModelScope.launch {
             networkRepository.addProductInCart(product)
         }
     }
 
-    fun removeProductFromCart(product: Product) {
+    fun removeProductFromCart(product: com.example.network.model.Product) {
         viewModelScope.launch {
             networkRepository.removeProductFromCart(product)
         }

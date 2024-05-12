@@ -76,12 +76,12 @@ fun Counter(
 @Preview(showBackground = true)
 @Composable
 private fun CounterPreview() {
-    FoodiesTheme {
+//    FoodiesTheme {
         Counter(
             amount = 1,
             onMinusClick = {},
             onPlusClick = {},
             elevated = false
         )
-    }
+//    }
 }

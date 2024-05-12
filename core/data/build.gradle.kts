@@ -35,12 +35,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:network"))
+    implementation(project(":core:runtime"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
     implementation(libs.hilt.android)
-    implementation(project(":foodie_api"))
     ksp(libs.hilt.compiler)
 }

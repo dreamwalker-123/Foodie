@@ -1,8 +1,5 @@
-package com.example.foodie_api
+package com.example.network
 
-import com.example.foodie_api.model.Category
-import com.example.foodie_api.model.Product
-import com.example.foodie_api.model.Tag
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -32,15 +29,16 @@ class RetrofitClient @Inject constructor(): FoodieApi {
         .build()
         .create(FoodieApi::class.java)
 
-    override suspend fun getCategories(): List<Category> {
+    override suspend fun getCategories(): List<com.example.network.model.Category> {
         return retrofit.getCategories()
     }
 
-    override suspend fun getTags(): List<Tag> {
+    override suspend fun getTags(): List<com.example.network.model.Tag> {
         return retrofit.getTags()
     }
 
-    override suspend fun getProducts(): List<Product> {
+    override suspend fun getProducts(): List<com.example.network.model.Product> {
         return retrofit.getProducts()
     }
+    suspend fun getProductById(id: Int): com.example.network.model.Product? = getProducts().firstOrNull { it.id == id }
 }

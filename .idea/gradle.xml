@@ -12,12 +12,13 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/data" />
+            <option value="$PROJECT_DIR$/core/network" />
+            <option value="$PROJECT_DIR$/core/runtime" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/basket" />
             <option value="$PROJECT_DIR$/feature/card_product" />
             <option value="$PROJECT_DIR$/feature/catalog" />
-            <option value="$PROJECT_DIR$/foodie_api" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

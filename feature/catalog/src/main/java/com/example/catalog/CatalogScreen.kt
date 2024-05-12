@@ -1,6 +1,5 @@
 package com.example.catalog
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,17 +17,18 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,8 +39,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.foodie_api.model.Category
-import com.example.foodie_api.model.Product
+import com.example.ui.components.BottomBarButton
 import com.example.ui.components.Counter
 import com.example.ui.components.EmptyScreen
 import com.example.ui.components.ErrorScreen
@@ -60,63 +60,109 @@ fun CatalogScreen(
 
     Column {
         // Topline на фигне
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.LightGray)) {
-            Image(
-                painter = painterResource(R.drawable.filter),
-                contentDescription ="filter_button",
-                modifier = Modifier
-                    .size(50.dp)
-                    .align(Alignment.CenterVertically)
+        CatalogTopAppBar(
+            onFilterClick = { /*TODO*/ },
+            onSearchClick = { /*TODO*/ },
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Image(
-                painter = painterResource(R.drawable.logo),
-                contentDescription ="logo",
-                modifier = Modifier
-                    .size(70.dp)
-                    .align(Alignment.CenterVertically)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Image(
-                painter = painterResource(R.drawable.search),
-                contentDescription ="search_button",
-                modifier = Modifier
-                    .size(50.dp)
-                    .align(Alignment.CenterVertically)
-            )
-        }
         // Лист с категориями
         ListItemCategories(
-            listOf(
-                Category(1, "Новинка"),
-                Category(2, "Вегетарианское блюдо"),
-                Category(3, "Хит!"),
-                Category(4, "Острое"),
-                Category(5, "Экспресс-меню")
-            )
+            uiState = categories.value,
+            currentCategory = currentCategory,
+            onCategoryClick = viewModel::updateCurrentCategory,
+            modifier = Modifier
+                .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
         )
         // Сетка с продуктами
         ItemList(
             uiState = products.value,
             currentCategory = currentCategory,
-            columns = GridCells.Fixed(2),
+            columns = columns,
             onCardClick = onProductClick,
             onAddClick = viewModel::addProductInCart,
             onRemoveClick = viewModel::removeProductFromCart,
             )
+        // нижняя кнопка с суммой
+        CartButton(
+            uiState = products.value,
+            onClick = onCartClick,
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_horizontal),
+                    vertical = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_vertical)
+                )
+        )
+    }
+}
+@Composable
+fun CatalogTopAppBar(
+    onFilterClick: () -> Unit,
+    onSearchClick: () -> Unit,
+) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color.LightGray)) {
+        IconButton(
+            onClick = onFilterClick
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.filter),
+                contentDescription = stringResource(com.example.ui.R.string.filter_button_description)
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Image(
+            painter = painterResource(R.drawable.logo),
+            contentDescription ="logo",
+            modifier = Modifier
+                .size(70.dp)
+                .align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = onSearchClick
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.search),
+                contentDescription = stringResource(com.example.ui.R.string.search_button_description)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CartButton(
+    uiState: ProductsUiState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (uiState is ProductsUiState.Success) {
+        val sumCart = uiState.product.map { it.key.price_current * it.value }.sum()
+        if (sumCart > 0) {
+            BottomBarButton(
+                onClick = onClick,
+                modifier = modifier
+            ) {
+                Icon(
+                    painter = painterResource(id = com.example.ui.R.drawable.ic_cart),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = dimensionResource(id = R.dimen.icon_cart_on_button_padding_end))
+                        .size(dimensionResource(id = R.dimen.icon_cart_on_button_size))
+                )
+                Text(text = sumCart.formatAsPriceString())
+            }
+        }
     }
 }
 
 @Composable
 fun ItemList(
     uiState: ProductsUiState,
-    currentCategory: Category?,
+    currentCategory: com.example.network.model.Category?,
     columns: GridCells,
     onCardClick: (Int) -> Unit,
-    onAddClick: (Product) -> Unit,
-    onRemoveClick: (Product) -> Unit,
+    onAddClick: (com.example.network.model.Product) -> Unit,
+    onRemoveClick: (com.example.network.model.Product) -> Unit,
 ) {
     when(uiState) {
         ProductsUiState.Loading -> {
@@ -129,7 +175,7 @@ fun ItemList(
         }
         is ProductsUiState.Success -> {
             val products = currentCategory?.let { category ->
-                uiState.product.filter { it.category_id == category.id }
+                uiState.product.filterKeys { it.category_id == category.id }
             } ?: uiState.product
             if (products.isNotEmpty()) {
                 LazyVerticalGrid(
@@ -137,10 +183,10 @@ fun ItemList(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(products) { product ->
+                    items(products.keys.toList()) { product ->
                         ProductCard(
                             product = product,
-                            quantityInCart = productsMap.getOrDefault(product, 0),
+                            quantityInCart = products.getOrDefault(product, 0),
                             onClick = onCardClick,
                             onAddClick = onAddClick,
                             onRemoveClick = onRemoveClick
@@ -156,11 +202,11 @@ fun ItemList(
 
 @Composable
 private fun ProductCard(
-    product: Product,
+    product: com.example.network.model.Product,
     quantityInCart: Int,
     onClick: (Int) -> Unit,
-    onAddClick: (Product) -> Unit,
-    onRemoveClick: (Product) -> Unit,
+    onAddClick: (com.example.network.model.Product) -> Unit,
+    onRemoveClick: (com.example.network.model.Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -265,28 +311,63 @@ private fun ProductCard(
 }
 
 @Composable
-fun ListItemCategories(categories: List<Category>) {
-    var state by remember { mutableIntStateOf(0) } // вывести выше
+fun ListItemCategories(
+    uiState: CategoriesUiState,
+    currentCategory: com.example.network.model.Category?,
+    onCategoryClick: (com.example.network.model.Category) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when(uiState) {
+        CategoriesUiState.Loading -> { /*TODO*/
+        }
 
-    LazyRow {
-        items(categories) {
-            var isSelected = false
-            if (categories[state] == it)
-                isSelected = true
-            val backColor: Color by animateColorAsState(targetValue = if (isSelected) Color(0xFFF15412) else Color.Transparent)
-            val textColor: Color by animateColorAsState(targetValue = if (isSelected) Color.White else Color.Black)
+        CategoriesUiState.Error -> { /*TODO*/
+        }
 
-            Card(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clickable {
-                        state = categories.indexOf(it)
-                    }
+        CategoriesUiState.Empty -> { /*TODO*/
+        }
+
+        is CategoriesUiState.Success -> {
+            val categoriesList = uiState.categories
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.space_between_chips)),
+                modifier = modifier
             ) {
-                Text(text = it.name, color = textColor,
-                    modifier = Modifier
-                        .background(backColor)
-                        .padding(10.dp))
+                itemsIndexed(categoriesList) { index, category ->
+                    // FIXME: Убрать обводку
+                    FilterChip(
+                        selected = category == currentCategory,
+                        onClick = { onCategoryClick(category) },
+                        label = {
+                            Text(
+                                text = category.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            labelColor = MaterialTheme.colorScheme.onSurface,
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.surface
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = false,
+                            selected = false,
+                            borderColor = Color.Transparent,
+                            borderWidth = dimensionResource(id = com.example.ui.R.dimen.zero)
+                        ),
+                        elevation = FilterChipDefaults.filterChipElevation(
+                            elevation = dimensionResource(
+                                id = com.example.ui.R.dimen.zero
+                            )
+                        ),
+                        modifier = Modifier
+                            .height(dimensionResource(id = R.dimen.chip_height))
+                            .padding(
+                                start = if (index == 0) dimensionResource(id = R.dimen.start_chip_padding_start)
+                                else dimensionResource(id = com.example.ui.R.dimen.zero)
+                            )
+                    )
+                }
             }
         }
     }
@@ -295,5 +376,5 @@ fun ListItemCategories(categories: List<Category>) {
 @Preview
 @Composable
 fun PreviewCatalogScreen() {
-    CatalogScreen()
+//    CatalogScreen()
 }

@@ -1,4 +1,4 @@
-package com.example.foodie_api.model
+package com.example.network.model
 
 import kotlinx.serialization.Serializable
 

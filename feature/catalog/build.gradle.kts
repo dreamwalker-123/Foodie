@@ -58,10 +58,11 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(project(":foodie_api"))
+    ksp(libs.hilt.compiler)
+    implementation(project(":core:network"))
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
-    ksp(libs.hilt.compiler)
+
 
     // Hilt with Compose для возможности создания hiltViewModel()
     implementation(libs.androidx.hilt.navigation.compose)

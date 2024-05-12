@@ -1,9 +1,9 @@
-package com.example.foodie_api.model
+package com.example.network.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Category(
+data class Tag(
     val id: Int,
     val name: String
 )

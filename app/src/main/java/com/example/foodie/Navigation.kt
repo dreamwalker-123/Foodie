@@ -60,8 +60,8 @@ fun Navigation(
 
 private const val PRODUCT_ROUTE = "product_route"
 
-enum class Screens(name: String) {
-    CATALOG("catalog"),
-    CARD_PRODUCT("card_product"),
-    BASKET("basket"),
-}
+//enum class Screens(name: String) {
+//    CATALOG("catalog"),
+//    CARD_PRODUCT("card_product"),
+//    BASKET("basket"),
+//}
