@@ -1,11 +1,12 @@
 package com.example.network
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.example.network.model.NetworkCategory
+import com.example.network.model.NetworkProduct
+import com.example.network.model.NetworkTag
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,30 +16,24 @@ class RetrofitClient @Inject constructor(): FoodieApi {
     private val baseUrl =
         "https://anika1d.github.io/WorkTestServer/"
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        })
-        .build()
-
     private var json = Json { ignoreUnknownKeys = true }
 
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .baseUrl(baseUrl).client(okHttpClient)
+        .baseUrl(baseUrl)
         .build()
         .create(FoodieApi::class.java)
 
-    override suspend fun getCategories(): List<com.example.network.model.Category> {
+    override suspend fun getCategories(): List<NetworkCategory> {
         return retrofit.getCategories()
     }
 
-    override suspend fun getTags(): List<com.example.network.model.Tag> {
+    override suspend fun getTags(): List<NetworkTag> {
         return retrofit.getTags()
     }
 
-    override suspend fun getProducts(): List<com.example.network.model.Product> {
+    override suspend fun getProducts(): List<NetworkProduct> {
         return retrofit.getProducts()
     }
-    suspend fun getProductById(id: Int): com.example.network.model.Product? = getProducts().firstOrNull { it.id == id }
+    suspend fun getProductById(id: Int): NetworkProduct? = getProducts().firstOrNull { it.id == id }
 }

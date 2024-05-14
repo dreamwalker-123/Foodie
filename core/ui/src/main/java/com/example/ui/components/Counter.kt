@@ -50,7 +50,7 @@ fun Counter(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_minus),
-                contentDescription = stringResource(com.example.ui.R.string.button_minus_description)
+                contentDescription = stringResource(R.string.button_minus_description)
             )
         }
         Text(

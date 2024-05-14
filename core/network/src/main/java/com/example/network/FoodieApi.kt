@@ -1,17 +1,16 @@
 package com.example.network
 
-import com.example.network.model.Category
-import com.example.network.model.Product
-import com.example.network.model.Tag
-import retrofit2.Response
+
+import com.example.network.model.NetworkCategory
+import com.example.network.model.NetworkProduct
+import com.example.network.model.NetworkTag
 import retrofit2.http.GET
-import retrofit2.http.Path
 
 interface FoodieApi {
     @GET("Categories.json")
-    suspend fun getCategories(): List<Category>
+    suspend fun getCategories(): List<NetworkCategory>
     @GET("Tags.json")
-    suspend fun getTags(): List<Tag>
+    suspend fun getTags(): List<NetworkTag>
     @GET("Products.json")
-    suspend fun getProducts(): List<Product>
+    suspend fun getProducts(): List<NetworkProduct>
 }

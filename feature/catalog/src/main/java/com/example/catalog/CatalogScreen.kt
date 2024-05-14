@@ -39,6 +39,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.model.Category
+import com.example.model.Product
 import com.example.ui.components.BottomBarButton
 import com.example.ui.components.Counter
 import com.example.ui.components.EmptyScreen
@@ -53,9 +56,9 @@ fun CatalogScreen(
     onCartClick: () -> Unit,
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
-    val tags = viewModel.tagsUiState.collectAsState()
-    val categories = viewModel.categoriesUiState.collectAsState()
-    val products = viewModel.productsUiState.collectAsState()
+//    val tags = viewModel.tagsUiState.collectAsStateWithLifecycle()
+    val categories = viewModel.categoriesUiState.collectAsStateWithLifecycle()
+    val products = viewModel.productsUiState.collectAsStateWithLifecycle()
     val currentCategory = viewModel.currentCategory.value
 
     Column {
@@ -87,8 +90,8 @@ fun CatalogScreen(
             onClick = onCartClick,
             modifier = Modifier
                 .padding(
-                    horizontal = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_horizontal),
-                    vertical = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_vertical)
+                    horizontal = dimensionResource(id = R.dimen.bottom_app_bar_margin_horizontal),
+                    vertical = dimensionResource(id = R.dimen.bottom_app_bar_margin_vertical)
                 )
         )
     }
@@ -98,15 +101,15 @@ fun CatalogTopAppBar(
     onFilterClick: () -> Unit,
     onSearchClick: () -> Unit,
 ) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(Color.LightGray)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
         IconButton(
-            onClick = onFilterClick
+            onClick = onFilterClick,
+            modifier = Modifier
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.filter),
-                contentDescription = stringResource(com.example.ui.R.string.filter_button_description)
+                contentDescription = stringResource(R.string.filter_button_description)
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -115,7 +118,6 @@ fun CatalogTopAppBar(
             contentDescription ="logo",
             modifier = Modifier
                 .size(70.dp)
-                .align(Alignment.CenterVertically)
         )
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
@@ -123,7 +125,7 @@ fun CatalogTopAppBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.search),
-                contentDescription = stringResource(com.example.ui.R.string.search_button_description)
+                contentDescription = stringResource(R.string.search_button_description)
             )
         }
     }
@@ -158,11 +160,11 @@ private fun CartButton(
 @Composable
 fun ItemList(
     uiState: ProductsUiState,
-    currentCategory: com.example.network.model.Category?,
+    currentCategory: Category?,
     columns: GridCells,
     onCardClick: (Int) -> Unit,
-    onAddClick: (com.example.network.model.Product) -> Unit,
-    onRemoveClick: (com.example.network.model.Product) -> Unit,
+    onAddClick: (Product) -> Unit,
+    onRemoveClick: (Product) -> Unit,
 ) {
     when(uiState) {
         ProductsUiState.Loading -> {
@@ -182,6 +184,7 @@ fun ItemList(
                     columns = columns,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
                 ) {
                     items(products.keys.toList()) { product ->
                         ProductCard(
@@ -202,11 +205,11 @@ fun ItemList(
 
 @Composable
 private fun ProductCard(
-    product: com.example.network.model.Product,
+    product: Product,
     quantityInCart: Int,
     onClick: (Int) -> Unit,
-    onAddClick: (com.example.network.model.Product) -> Unit,
-    onRemoveClick: (com.example.network.model.Product) -> Unit,
+    onAddClick: (Product) -> Unit,
+    onRemoveClick: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -313,8 +316,8 @@ private fun ProductCard(
 @Composable
 fun ListItemCategories(
     uiState: CategoriesUiState,
-    currentCategory: com.example.network.model.Category?,
-    onCategoryClick: (com.example.network.model.Category) -> Unit,
+    currentCategory: Category?,
+    onCategoryClick: (Category) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when(uiState) {
@@ -331,7 +334,7 @@ fun ListItemCategories(
             val categoriesList = uiState.categories
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.space_between_chips)),
-                modifier = modifier
+                modifier = modifier.padding(bottom = 8.dp)
             ) {
                 itemsIndexed(categoriesList) { index, category ->
                     // FIXME: Убрать обводку

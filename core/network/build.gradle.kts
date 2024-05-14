@@ -1,21 +1,23 @@
 plugins {
+    id("java-library")
     alias(libs.plugins.jetbrainsKotlinJvm)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
-
-    // Network
+    // Retrofit and serialization
     implementation(libs.retrofit)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.converter.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
-
-    // interceptor
     implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
 
-    // Hilt
+    // DI Hilt for Kotlin library
     implementation(libs.hilt.core)
     ksp(libs.hilt.compiler)
 }

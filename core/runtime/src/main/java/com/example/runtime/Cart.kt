@@ -1,6 +1,7 @@
 package com.example.runtime
 
-import com.example.network.model.Product
+
+import com.example.model.Product
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -13,13 +14,13 @@ import javax.inject.Singleton
 
 @Singleton
 class Cart @Inject constructor() : RuntimeDataSource {
-    private val productsMap = mutableMapOf<com.example.network.model.Product, Int>()
-    private val cartFlow = MutableSharedFlow<Map<com.example.network.model.Product, Int>>()
+    private val productsMap = mutableMapOf<Product, Int>()
+    private val cartFlow = MutableSharedFlow<Map<Product, Int>>()
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    override val cart: Flow<Map<com.example.network.model.Product, Int>> = cartFlow.onStart { emit(productsMap.toMap()) }
+    override val cart: Flow<Map<Product, Int>> = cartFlow.onStart { emit(productsMap.toMap()) }
 
-    override fun addProduct(product: com.example.network.model.Product) {
+    override fun addProduct(product: Product) {
         productsMap.merge(product, 1) { oldValue, _ ->
             oldValue + 1
         }
@@ -28,7 +29,7 @@ class Cart @Inject constructor() : RuntimeDataSource {
         }
     }
 
-    override fun removeProduct(product: com.example.network.model.Product) {
+    override fun removeProduct(product: Product) {
         productsMap.merge(product, 0) { oldValue, _ ->
             if (oldValue <= 1) {
                 null

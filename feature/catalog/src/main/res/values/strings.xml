@@ -2,4 +2,10 @@
 <resources>
     <string name="empty_screen_message">Каталог пуст</string>
     <string name="empty_filters_screen_message">Таких блюд нет :(\nПопробуйте изменить фильтры</string>
+
+    <string name="button_minus_description">Кнопка минус</string>
+    <string name="button_plus_description">Кнопка плюс</string>
+    <string name="button_up_description">Кнопка вверх</string>
+    <string name="filter_button_description">Кнопка фильтра</string>
+    <string name="search_button_description">Кнопка поиска</string>
 </resources>
