@@ -56,23 +56,6 @@ class CatalogViewModel @Inject constructor(
         initialValue = ProductsUiState.Loading
     )
 
-//    private fun getProducts() {
-//        viewModelScope.launch {
-//            networkRepository.getProducts().map { result ->
-//                result.fold(
-//                    onSuccess = { cart ->
-//                        _productsUiState.value = if (cart.isNotEmpty()) {
-//                            ProductsUiState.Success(cart)
-//                        } else {
-//                            ProductsUiState.Empty
-//                        }
-//                    },
-//                    onFailure = { _productsUiState.value = ProductsUiState.Error(it) }
-//                )
-//            }
-//        }
-//    }
-
     fun getCategories() {
         viewModelScope.launch {
             networkRepository.getCategories()
