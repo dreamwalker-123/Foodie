@@ -24,8 +24,10 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,58 +49,92 @@ import com.example.ui.components.LoadingScreen
 import com.example.ui.utils.formatAsPriceString
 
 @Composable
-fun CatalogScreen(
+fun CatalogRoute(
     columns: GridCells,
     onProductClick: (Int) -> Unit,
-    onCartClick: () -> Unit,
+    onBasketClick: () -> Unit,
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
 //    val tags = viewModel.tagsUiState.collectAsStateWithLifecycle()
-    val categories = viewModel.categoriesUiState.collectAsStateWithLifecycle()
-    val products = viewModel.productsUiState.collectAsStateWithLifecycle()
+    val categories by viewModel.categoriesUiState.collectAsStateWithLifecycle()
+    val products by viewModel.productsUiState.collectAsStateWithLifecycle()
     val currentCategory = viewModel.currentCategory.value
 
-    Column {
-        // Topline на фигне
-        CatalogTopAppBar(
-            onFilterClick = { /*TODO*/ },
-            onSearchClick = { /*TODO*/ },
+    CatalogScreen(
+        products = products,
+        onBasketClick = onBasketClick,
+        categories = categories,
+        currentCategory = currentCategory,
+        onCategoryClick = viewModel::updateCurrentCategory,
+        columns = columns,
+        onProductClick = onProductClick,
+        onAddProductClick = viewModel::addProductInCart,
+        onRemoveProductClick = viewModel::removeProductFromCart,
+    )
+}
+@Composable
+fun CatalogScreen(
+    products: ProductsUiState,
+    categories: CategoriesUiState,
+    onBasketClick: () -> Unit,
+    currentCategory: Category?,
+    onCategoryClick: (Category) -> Unit,
+    columns: GridCells,
+    onProductClick: (Int) -> Unit,
+    onAddProductClick: (Product) -> Unit,
+    onRemoveProductClick: (Product) -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            // Topline на фигне
+            CatalogTopAppBar(
+                onFilterClick = { /*TODO*/ },
+                onSearchClick = { /*TODO*/ },
             )
-        // Лист с категориями
-        ListItemCategories(
-            uiState = categories.value,
-            currentCategory = currentCategory,
-            onCategoryClick = viewModel::updateCurrentCategory,
-            modifier = Modifier
-                .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
-        )
-        // Сетка с продуктами
-        ItemList(
-            uiState = products.value,
-            currentCategory = currentCategory,
-            columns = columns,
-            onCardClick = onProductClick,
-            onAddClick = viewModel::addProductInCart,
-            onRemoveClick = viewModel::removeProductFromCart,
+        },
+        bottomBar = {
+            BasketButton(
+                uiState = products,
+                onClick = onBasketClick,
+                modifier = Modifier
+                    .padding(
+                        horizontal = dimensionResource(id = R.dimen.bottom_app_bar_margin_horizontal),
+                        vertical = dimensionResource(id = R.dimen.bottom_app_bar_margin_vertical)
+                    )
             )
-        // нижняя кнопка с суммой
-        CartButton(
-            uiState = products.value,
-            onClick = onCartClick,
-            modifier = Modifier
-                .padding(
-                    horizontal = dimensionResource(id = R.dimen.bottom_app_bar_margin_horizontal),
-                    vertical = dimensionResource(id = R.dimen.bottom_app_bar_margin_vertical)
-                )
-        )
+        },
+    ) {innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            // Лист с категориями
+            ListItemCategories(
+                uiState = categories,
+                currentCategory = currentCategory,
+                onCategoryClick = onCategoryClick,
+                modifier = Modifier
+                    .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
+            )
+            // Сетка с продуктами
+            ItemList(
+                uiState = products,
+                currentCategory = currentCategory,
+                columns = columns,
+                onCardClick = onProductClick,
+                onAddClick = onAddProductClick,
+                onRemoveClick = onRemoveProductClick,
+            )
+        }
     }
 }
+
+
 @Composable
 fun CatalogTopAppBar(
     onFilterClick: () -> Unit,
     onSearchClick: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 8.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically) {
         IconButton(
             onClick = onFilterClick,
@@ -129,7 +165,7 @@ fun CatalogTopAppBar(
 }
 
 @Composable
-private fun CartButton(
+fun BasketButton(
     uiState: ProductsUiState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -139,7 +175,7 @@ private fun CartButton(
         if (sumCart > 0) {
             BottomBarButton(
                 onClick = onClick,
-                modifier = modifier
+                modifier = modifier,
             ) {
                 Icon(
                     painter = painterResource(id = com.example.ui.R.drawable.ic_cart),
@@ -376,5 +412,44 @@ fun ListItemCategories(
 @Preview
 @Composable
 fun PreviewCatalogScreen() {
-//    CatalogScreen()
+    CatalogScreen(
+        products = ProductsUiState.Success(
+            mapOf(
+                Product(
+                    name = "Том Ям",
+                    category_id = 1,
+                    price_current = 72000,
+                    price_old = 80000,
+                    measure = 500,
+                    measure_unit = "г"
+                ) to 2,
+                *List(5) {
+                    Product(
+                        name = "Название блюда $it",
+                        category_id = 1,
+                        price_current = 48000,
+                        measure = 500,
+                        measure_unit = "г"
+                    ) to 0
+                }.toTypedArray()
+            )
+        ),
+        categories = CategoriesUiState.Success(
+            listOf(
+                Category(id = 1, name = "Роллы"),
+                Category(name = "Суши"),
+                Category(name = "Наборы"),
+                Category(name = "Горячие блюда"),
+                Category(name = "Супы"),
+                Category(name = "Десерты"),
+            )
+        ),
+        currentCategory = Category(id = 1, name = "Роллы"),
+        columns = GridCells.Fixed(2),
+        onAddProductClick = {},
+        onRemoveProductClick = {},
+        onCategoryClick = {},
+        onProductClick = {},
+        onBasketClick = {},
+    )
 }

@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,14 +46,29 @@ import com.example.ui.utils.formatAsPriceString
 
 
 @Composable
-fun CardProductScreen(
+fun CardProductRoute(
     shouldShowExpandedLayout: Boolean,
     onUpClick: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: CardProductViewModel = hiltViewModel(),
 ) {
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    CardProductScreen(
+        onUpClick = onUpClick,
+        uiState = uiState,
+        addProductInCard = viewModel::addProductInCart,
+        removeProductFromCart = viewModel::removeProductFromCart,
+        shouldShowExpandedLayout = shouldShowExpandedLayout,
+    )
+}
+@Composable
+fun CardProductScreen(
+    onUpClick: () -> Unit,
+    uiState: CardProductUiState,
+    addProductInCard: (Product) -> Unit,
+    removeProductFromCart: (Product) -> Unit,
+    shouldShowExpandedLayout: Boolean,
+) {
     Scaffold(
         topBar = {
             ProductAppBar(onUpClick)
@@ -63,7 +79,7 @@ fun CardProductScreen(
                 val quantity = uiState.productWithQuantity.second
                 if (quantity == 0) {
                     BottomBarButton(
-                        onClick = { viewModel.addProductInCart(product) },
+                        onClick = { addProductInCard(product) },
                         modifier = Modifier.padding(
                             horizontal = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_horizontal),
                             vertical = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_vertical)
@@ -78,8 +94,8 @@ fun CardProductScreen(
                 } else {
                     Counter(
                         amount = quantity,
-                        onMinusClick = { viewModel.removeProductFromCart(product) },
-                        onPlusClick = { viewModel.addProductInCart(product) },
+                        onMinusClick = { removeProductFromCart(product) },
+                        onPlusClick = { addProductInCard(product) },
                         modifier = Modifier
                             .padding(
                                 horizontal = dimensionResource(id = com.example.ui.R.dimen.bottom_app_bar_margin_horizontal),
@@ -90,7 +106,6 @@ fun CardProductScreen(
                 }
             }
         },
-        modifier = modifier
     ) { innerPadding ->
         Content(
             uiState = uiState,
@@ -262,8 +277,29 @@ private fun ParameterListItem(
 @Composable
 private fun ProductScreenPreview() {
     CardProductScreen(
+        uiState = CardProductUiState.Success(
+            productWithQuantity = Pair(
+                Product(
+                    name = "Том Ям",
+                    price_current = 48000,
+                    price_old = 56000), 1)
+//                Product(
+//                    name = "Бургер с кучей овощей и чеддером",
+//                    price_current = 48000
+//                ) to 1,
+//                Product(
+//                    name = "Кусок пиццы с соусом песто и оливками",
+//                    price_current = 48000
+//                ) to 1,
+//                Product(
+//                    name = "Ролл Сяки Маки",
+//                    price_current = 48000
+//                ) to 1
+        ),
         shouldShowExpandedLayout = false,
         onUpClick = {},
+        addProductInCard = {},
+        removeProductFromCart = {},
     )
 
 }

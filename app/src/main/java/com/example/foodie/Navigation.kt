@@ -10,11 +10,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.basket.BasketScreen
-import com.example.card_product.CardProductScreen
-import com.example.card_product.PRODUCT_ID_ARGUMENT
+import com.example.basket.BasketRoute
 import com.example.card_product.CARD_PRODUCT_SCREEN
-import com.example.catalog.CatalogScreen
+import com.example.card_product.CardProductRoute
+import com.example.card_product.PRODUCT_ID_ARGUMENT
+import com.example.catalog.CatalogRoute
 
 @Composable
 fun Navigation(
@@ -29,7 +29,7 @@ fun Navigation(
         composable(
             route = CATALOG_SCREEN,
         ) {
-            CatalogScreen(
+            CatalogRoute(
                 columns = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     GridCells.Fixed(4)
                 } else {
@@ -37,7 +37,7 @@ fun Navigation(
                 },
                 // передача аргумента и также одновременно происходит запись аргумента в Bundle
                 onProductClick = { navController.navigate("$CARD_PRODUCT_SCREEN/${it}") },
-                onCartClick = { navController.navigate(BASKET_SCREEN)}
+                onBasketClick = { navController.navigate(BASKET_SCREEN)}
             )
         }
 
@@ -49,17 +49,15 @@ fun Navigation(
                 defaultValue = 0
             })
         ) {
-            CardProductScreen(
+            CardProductRoute(
                 onUpClick = navController::navigateUp,
                 shouldShowExpandedLayout = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded,
             )
         }
 
         composable(BASKET_SCREEN) {
-            BasketScreen(
-//                onGoToItem = { id ->
-//                    navController.navigate("details/$id")
-//                }
+            BasketRoute(
+                onUpClick = navController::navigateUp,
             )
         }
     }

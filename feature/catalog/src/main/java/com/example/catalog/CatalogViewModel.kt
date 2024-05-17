@@ -72,8 +72,11 @@ class CatalogViewModel @Inject constructor(
         }
     }
 
+    // добавил сбрасывание категории при нажатии на уже выбранную
     fun updateCurrentCategory(category: Category) {
-        if (_currentCategory.value != category) {
+        if (_currentCategory.value == category) {
+            _currentCategory.value = null
+        } else {
             _currentCategory.value = category
         }
     }
