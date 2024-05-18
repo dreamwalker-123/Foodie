@@ -15,20 +15,25 @@ import com.example.card_product.CARD_PRODUCT_SCREEN
 import com.example.card_product.CardProductRoute
 import com.example.card_product.PRODUCT_ID_ARGUMENT
 import com.example.catalog.CatalogRoute
+import com.example.splash.SplashScreen
 
 @Composable
 fun Navigation(
     windowSizeClass: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
 ) {
-//    var id by rememberSaveable { mutableStateOf<Int?>(0) }
     NavHost(
         navController = navController,
-        startDestination = CATALOG_SCREEN,
+        startDestination = SPLASH_SCREEN,
     ) {
-        composable(
-            route = CATALOG_SCREEN,
-        ) {
+        composable(SPLASH_SCREEN) {
+            SplashScreen(
+                popBackStack = { navController.popBackStack() },
+                navigate = { navController.navigate(CATALOG_SCREEN) }
+            )
+        }
+
+        composable(CATALOG_SCREEN) {
             CatalogRoute(
                 columns = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     GridCells.Fixed(4)
@@ -65,3 +70,4 @@ fun Navigation(
 
 private const val CATALOG_SCREEN = "CatalogScreen"
 private const val BASKET_SCREEN = "BasketScreen"
+private const val SPLASH_SCREEN = "SplashScreen"

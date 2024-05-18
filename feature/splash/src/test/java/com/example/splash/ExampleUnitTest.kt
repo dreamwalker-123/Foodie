@@ -1,6 +1,7 @@
-package com.example.data
+package com.example.splash
 
 import org.junit.Test
+
 import org.junit.Assert.*
 
 /**

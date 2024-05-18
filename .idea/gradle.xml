@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/feature/basket" />
             <option value="$PROJECT_DIR$/feature/card_product" />
             <option value="$PROJECT_DIR$/feature/catalog" />
+            <option value="$PROJECT_DIR$/feature/splash" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

@@ -240,5 +240,4 @@ private fun CartScreenPreview() {
         onRemoveProductClick = {},
         onUpClick = {}
     )
-
 }

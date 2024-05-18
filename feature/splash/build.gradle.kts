@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ui"
+    namespace = "com.example.splash"
     compileSdk = 34
 
     defaultConfig {
@@ -36,11 +36,16 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+
+    //Lottie
+    implementation (libs.lottie.compose)
     implementation(libs.androidx.junit.ktx)
 
     debugImplementation(libs.androidx.ui.tooling)

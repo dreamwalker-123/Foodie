@@ -16,6 +16,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // добавить эту строчку
+        maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots/") }
     }
 }
 
@@ -24,6 +26,7 @@ include(":app")
 include(":feature:catalog")
 include(":feature:card_product")
 include(":feature:basket")
+include(":feature:splash")
 include(":core:data")
 include(":core:ui")
 include(":core:runtime")

@@ -53,6 +53,7 @@ dependencies {
     // DI Hilt for Kotlin library
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.junit.ktx)
     ksp(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.ui.tooling)

@@ -283,18 +283,6 @@ private fun ProductScreenPreview() {
                     name = "Том Ям",
                     price_current = 48000,
                     price_old = 56000), 1)
-//                Product(
-//                    name = "Бургер с кучей овощей и чеддером",
-//                    price_current = 48000
-//                ) to 1,
-//                Product(
-//                    name = "Кусок пиццы с соусом песто и оливками",
-//                    price_current = 48000
-//                ) to 1,
-//                Product(
-//                    name = "Ролл Сяки Маки",
-//                    price_current = 48000
-//                ) to 1
         ),
         shouldShowExpandedLayout = false,
         onUpClick = {},

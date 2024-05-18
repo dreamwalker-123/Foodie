@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":feature:catalog"))
     implementation(project(":feature:card_product"))
     implementation(project(":feature:basket"))
+    implementation(project(":feature:splash"))
 
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
@@ -70,4 +71,7 @@ dependencies {
     // DI with hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    // Test
+    androidTestImplementation ("androidx.compose.ui:ui-test-junit4")
 }
