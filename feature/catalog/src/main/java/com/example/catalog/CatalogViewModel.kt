@@ -26,17 +26,18 @@ class CatalogViewModel @Inject constructor(
         MutableStateFlow(CategoriesUiState.Loading)
     val categoriesUiState = _categoriesUiState.asStateFlow()
 
-//    private val _productsUiState: MutableStateFlow<ProductsUiState> =
-//        MutableStateFlow(ProductsUiState.Loading)
-//    val productsUiState = _productsUiState.asStateFlow()
+    private val _tagsUiState: MutableStateFlow<TagUiState> =
+        MutableStateFlow(TagUiState.Loading)
+    val tagsUiState = _tagsUiState.asStateFlow()
 
-//    private val _tagsUiState: MutableStateFlow<TagUiState> =
-//        MutableStateFlow(TagUiState.Loading)
-//    val tagsUiState = _productsUiState.asStateFlow()
+    private val _listWithIdTags = MutableStateFlow( mutableListOf<Int>() )
+    val listWithIdTags = _listWithIdTags.asStateFlow()
 
     init {
-//        getProducts()
-        getCategories()
+        viewModelScope.launch {
+            getTags()
+            getCategories()
+        }
     }
 
     val productsUiState = networkRepository.getProducts().map { result ->
@@ -70,6 +71,28 @@ class CatalogViewModel @Inject constructor(
                     _categoriesUiState.value = CategoriesUiState.Error
                 }
         }
+    }
+
+    fun getTags() {
+        viewModelScope.launch {
+            networkRepository.getTags()
+                .onSuccess {
+                    _tagsUiState.value = if (it.isEmpty()) {
+                        TagUiState.Empty
+                    } else {
+                        TagUiState.Success(it)
+                    }
+                }
+                .onFailure {
+                    _tagsUiState.value = TagUiState.Error
+                }
+        }
+    }
+
+    fun addOrRemoveTagId(id: Int) {
+        if (_listWithIdTags.value.contains(id)) {
+            _listWithIdTags.value.remove(id)
+        } else _listWithIdTags.value.add(id)
     }
 
     // добавил сбрасывание категории при нажатии на уже выбранную

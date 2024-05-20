@@ -3,6 +3,7 @@ package com.example.data.repository
 import com.example.data.utils.asInternalModel
 import com.example.model.Category
 import com.example.model.Product
+import com.example.model.Tag
 import com.example.network.RetrofitClient
 import com.example.network.model.NetworkCategory
 import com.example.network.model.NetworkProduct
@@ -33,6 +34,10 @@ class NetworkRepository @Inject constructor(
 
     suspend fun getCategories(): Result<List<Category>> = runCatching {
         networkDataSource.getCategories().map { it.asInternalModel() }
+    }
+
+    suspend fun getTags(): Result<List<Tag>> = runCatching {
+        networkDataSource.getTags().map { it.asInternalModel() }
     }
 
     fun getProductById(id: Int): Flow<Result<Pair<Product, Int>?>> = combine(

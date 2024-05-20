@@ -11,23 +11,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,12 +58,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.Category
 import com.example.model.Product
+import com.example.model.Tag
 import com.example.ui.components.BottomBarButton
 import com.example.ui.components.Counter
 import com.example.ui.components.EmptyScreen
 import com.example.ui.components.ErrorScreen
 import com.example.ui.components.LoadingScreen
 import com.example.ui.utils.formatAsPriceString
+import kotlinx.coroutines.launch
+import java.util.Locale.filter
 
 @Composable
 fun CatalogRoute(
@@ -55,40 +75,57 @@ fun CatalogRoute(
     onBasketClick: () -> Unit,
     viewModel: CatalogViewModel = hiltViewModel(),
 ) {
-//    val tags = viewModel.tagsUiState.collectAsStateWithLifecycle()
-    val categories by viewModel.categoriesUiState.collectAsStateWithLifecycle()
     val products by viewModel.productsUiState.collectAsStateWithLifecycle()
+    val categories by viewModel.categoriesUiState.collectAsStateWithLifecycle()
     val currentCategory = viewModel.currentCategory.value
+    val tags by viewModel.tagsUiState.collectAsStateWithLifecycle()
+    val listWithIdTags by viewModel.listWithIdTags.collectAsStateWithLifecycle()
 
     CatalogScreen(
         products = products,
-        onBasketClick = onBasketClick,
         categories = categories,
         currentCategory = currentCategory,
-        onCategoryClick = viewModel::updateCurrentCategory,
+        tags = tags,
+        listWithIdTags = listWithIdTags,
         columns = columns,
+        onBasketClick = onBasketClick,
+        onCategoryClick = viewModel::updateCurrentCategory,
         onProductClick = onProductClick,
         onAddProductClick = viewModel::addProductInCart,
         onRemoveProductClick = viewModel::removeProductFromCart,
+        onTagClicked = viewModel::addOrRemoveTagId,
     )
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
     products: ProductsUiState,
     categories: CategoriesUiState,
-    onBasketClick: () -> Unit,
     currentCategory: Category?,
-    onCategoryClick: (Category) -> Unit,
+    tags: TagUiState,
+    listWithIdTags: List<Int>,
     columns: GridCells,
+    onBasketClick: () -> Unit,
+    onCategoryClick: (Category) -> Unit,
     onProductClick: (Int) -> Unit,
     onAddProductClick: (Product) -> Unit,
     onRemoveProductClick: (Product) -> Unit,
+    onTagClicked: (Int) -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState()
+//    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    var checked2 = rememberSaveable { mutableListOf(0) }
+    if (tags is TagUiState.Success) {
+        checked2 = tags.tags.map { it.id }.toMutableList()
+    }
+
     Scaffold(
         topBar = {
             // Topline на фигне
             CatalogTopAppBar(
-                onFilterClick = { /*TODO*/ },
+                onFilterClick = { showBottomSheet = true },
                 onSearchClick = { /*TODO*/ },
             )
         },
@@ -103,7 +140,47 @@ fun CatalogScreen(
                     )
             )
         },
-    ) {innerPadding ->
+    ) { innerPadding ->
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text("Подобрать блюда", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    LazyColumn(
+                        Modifier.padding(
+                        start = 10.dp, end = 10.dp,
+                        top = 10.dp, bottom = 40.dp)) {
+                        if (tags is TagUiState.Success) {
+                            itemsIndexed(tags.tags) {index, tag ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = tag.name)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Checkbox(
+                                        checked = checked2.contains(tag.id),
+                                        onCheckedChange = {
+                                            if (checked2.contains(tag.id)) checked2.remove(tag.id)
+                                                else checked2.add(tag.id)
+                                            onTagClicked(tag.id)
+                                            !it
+                                        }
+                                    )
+                                }
+                                if (index < tags.tags.size - 1) {
+                                    HorizontalDivider()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Column(modifier = Modifier.padding(innerPadding)) {
             // Лист с категориями
             ListItemCategories(
@@ -117,6 +194,7 @@ fun CatalogScreen(
             ItemList(
                 uiState = products,
                 currentCategory = currentCategory,
+                listWithIdTags = listWithIdTags,
                 columns = columns,
                 onCardClick = onProductClick,
                 onAddClick = onAddProductClick,
@@ -194,6 +272,7 @@ fun BasketButton(
 fun ItemList(
     uiState: ProductsUiState,
     currentCategory: Category?,
+    listWithIdTags: List<Int>,
     columns: GridCells,
     onCardClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
@@ -209,8 +288,13 @@ fun ItemList(
             EmptyScreen(message = stringResource(R.string.empty_screen_message))
         }
         is ProductsUiState.Success -> {
-            val products = currentCategory?.let { category ->
-                uiState.product.filterKeys { it.category_id == category.id }
+            val products = currentCategory?.let { category -> //FIXME
+                uiState.product.filterKeys {
+                    it.category_id == category.id &&
+                        if (listWithIdTags.isNotEmpty())
+                            it.tag_ids.filter { item -> listWithIdTags.contains(item) }.isNotEmpty()
+                        else true
+                }
             } ?: uiState.product
             if (products.isNotEmpty()) {
                 LazyVerticalGrid(
@@ -444,6 +528,16 @@ fun PreviewCatalogScreen() {
                 Category(name = "Десерты"),
             )
         ),
+        tags = TagUiState.Success(
+            listOf(
+                Tag(1, "Новинка"),
+                Tag(2, "Вегетарианское блюдо"),
+                Tag(3, "Хит!"),
+                Tag(4, "Острое"),
+                Tag(5, "Экспресс-меню"),
+            )
+        ),
+        listWithIdTags = listOf(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
         currentCategory = Category(id = 1, name = "Роллы"),
         columns = GridCells.Fixed(2),
         onAddProductClick = {},
@@ -451,5 +545,6 @@ fun PreviewCatalogScreen() {
         onCategoryClick = {},
         onProductClick = {},
         onBasketClick = {},
+        onTagClicked = {},
     )
 }
