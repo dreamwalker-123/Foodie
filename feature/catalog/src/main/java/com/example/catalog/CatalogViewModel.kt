@@ -30,8 +30,9 @@ class CatalogViewModel @Inject constructor(
         MutableStateFlow(TagUiState.Loading)
     val tagsUiState = _tagsUiState.asStateFlow()
 
-    private val _listWithIdTags = MutableStateFlow( mutableListOf<Int>() )
-    val listWithIdTags = _listWithIdTags.asStateFlow()
+//  состояния для чекбоксов
+    private val _mapWithCheckedState = MutableStateFlow( mapOf<Int, Boolean>() )
+    val mapWithCheckedState = _mapWithCheckedState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -80,6 +81,12 @@ class CatalogViewModel @Inject constructor(
                     _tagsUiState.value = if (it.isEmpty()) {
                         TagUiState.Empty
                     } else {
+                        // создаем мапу со всеми айди и даем по умолчанию всем false,
+                        // т.е. изначально чекбоксы не будут выбраны
+                        val map = mutableMapOf<Int, Boolean>()
+                        it.map { tag -> tag.id }.forEach { int -> map[int] = false }
+                        _mapWithCheckedState.value = map.toMap()
+
                         TagUiState.Success(it)
                     }
                 }
@@ -90,9 +97,11 @@ class CatalogViewModel @Inject constructor(
     }
 
     fun addOrRemoveTagId(id: Int) {
-        if (_listWithIdTags.value.contains(id)) {
-            _listWithIdTags.value.remove(id)
-        } else _listWithIdTags.value.add(id)
+        if (_mapWithCheckedState.value.contains(id)) {
+            val map = _mapWithCheckedState.value.toMutableMap()
+            map[id] = !map[id]!!
+            _mapWithCheckedState.value = map
+        }
     }
 
     // добавил сбрасывание категории при нажатии на уже выбранную

@@ -1,7 +1,11 @@
 package com.example.catalog
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,15 +20,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.Button
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -34,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,8 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,8 +63,7 @@ import com.example.ui.components.EmptyScreen
 import com.example.ui.components.ErrorScreen
 import com.example.ui.components.LoadingScreen
 import com.example.ui.utils.formatAsPriceString
-import kotlinx.coroutines.launch
-import java.util.Locale.filter
+import java.util.stream.Collectors.toSet
 
 @Composable
 fun CatalogRoute(
@@ -79,14 +76,14 @@ fun CatalogRoute(
     val categories by viewModel.categoriesUiState.collectAsStateWithLifecycle()
     val currentCategory = viewModel.currentCategory.value
     val tags by viewModel.tagsUiState.collectAsStateWithLifecycle()
-    val listWithIdTags by viewModel.listWithIdTags.collectAsStateWithLifecycle()
+    val checkedState by viewModel.mapWithCheckedState.collectAsStateWithLifecycle()
 
     CatalogScreen(
         products = products,
         categories = categories,
         currentCategory = currentCategory,
         tags = tags,
-        listWithIdTags = listWithIdTags,
+        checkedState = checkedState,
         columns = columns,
         onBasketClick = onBasketClick,
         onCategoryClick = viewModel::updateCurrentCategory,
@@ -103,7 +100,7 @@ fun CatalogScreen(
     categories: CategoriesUiState,
     currentCategory: Category?,
     tags: TagUiState,
-    listWithIdTags: List<Int>,
+    checkedState: Map<Int, Boolean>,
     columns: GridCells,
     onBasketClick: () -> Unit,
     onCategoryClick: (Category) -> Unit,
@@ -116,10 +113,6 @@ fun CatalogScreen(
 //    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    var checked2 = rememberSaveable { mutableListOf(0) }
-    if (tags is TagUiState.Success) {
-        checked2 = tags.tags.map { it.id }.toMutableList()
-    }
 
     Scaffold(
         topBar = {
@@ -141,7 +134,9 @@ fun CatalogScreen(
             )
         },
     ) { innerPadding ->
-
+//    var statesForChecked by remember {
+//        mutableStateOf<List<Boolean>>(mutableListOf())
+//    }
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -157,17 +152,15 @@ fun CatalogScreen(
                         start = 10.dp, end = 10.dp,
                         top = 10.dp, bottom = 40.dp)) {
                         if (tags is TagUiState.Success) {
+
                             itemsIndexed(tags.tags) {index, tag ->
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(text = tag.name)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Checkbox(
-                                        checked = checked2.contains(tag.id),
+                                        checked = checkedState[tag.id] ?: false,
                                         onCheckedChange = {
-                                            if (checked2.contains(tag.id)) checked2.remove(tag.id)
-                                                else checked2.add(tag.id)
                                             onTagClicked(tag.id)
-                                            !it
                                         }
                                     )
                                 }
@@ -194,7 +187,7 @@ fun CatalogScreen(
             ItemList(
                 uiState = products,
                 currentCategory = currentCategory,
-                listWithIdTags = listWithIdTags,
+                checkedState = checkedState,
                 columns = columns,
                 onCardClick = onProductClick,
                 onAddClick = onAddProductClick,
@@ -272,14 +265,14 @@ fun BasketButton(
 fun ItemList(
     uiState: ProductsUiState,
     currentCategory: Category?,
-    listWithIdTags: List<Int>,
+    checkedState: Map<Int, Boolean>,
     columns: GridCells,
     onCardClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
     onRemoveClick: (Product) -> Unit,
 ) {
     when(uiState) {
-        ProductsUiState.Loading -> {
+        is ProductsUiState.Loading -> {
             LoadingScreen()
         }
 
@@ -288,15 +281,22 @@ fun ItemList(
             EmptyScreen(message = stringResource(R.string.empty_screen_message))
         }
         is ProductsUiState.Success -> {
-            val products = currentCategory?.let { category -> //FIXME
+            var products = currentCategory?.let { category ->
                 uiState.product.filterKeys {
-                    it.category_id == category.id &&
-                        if (listWithIdTags.isNotEmpty())
-                            it.tag_ids.filter { item -> listWithIdTags.contains(item) }.isNotEmpty()
-                        else true
+                    it.category_id == category.id
                 }
             } ?: uiState.product
+
+            if (checkedState.values.contains(true)) {
+                products = products.filterKeys {
+                    if (it.tag_ids.isEmpty()) {
+                        false
+                    } else it.tag_ids.any { item -> checkedState[item]!! }
+                }
+            }
+
             if (products.isNotEmpty()) {
+
                 LazyVerticalGrid(
                     columns = columns,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -537,7 +537,7 @@ fun PreviewCatalogScreen() {
                 Tag(5, "Экспресс-меню"),
             )
         ),
-        listWithIdTags = listOf(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),
+        checkedState = mapOf(1 to false, 2 to false, 3 to false, 4 to false, 5 to false),
         currentCategory = Category(id = 1, name = "Роллы"),
         columns = GridCells.Fixed(2),
         onAddProductClick = {},
