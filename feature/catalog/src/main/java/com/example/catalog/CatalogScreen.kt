@@ -1,12 +1,8 @@
 package com.example.catalog
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +19,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -39,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,19 +46,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,7 +70,6 @@ import com.example.ui.components.EmptyScreen
 import com.example.ui.components.ErrorScreen
 import com.example.ui.components.LoadingScreen
 import com.example.ui.utils.formatAsPriceString
-import java.util.stream.Collectors.toSet
 
 @Composable
 fun CatalogRoute(
@@ -122,15 +118,21 @@ fun CatalogScreen(
     val sheetState = rememberModalBottomSheetState()
 //    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-
+    var showSearchScreen by remember { mutableStateOf(false) }
+    var textFromSearch by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             // Topline на фигне
             CatalogTopAppBar(
                 onFilterClick = { showBottomSheet = true },
-                onSearchClick = { /*TODO*/ },
-                numberOfTags = checkedState.values.count { it == true }
+                onSearchClick = { showSearchScreen = true },
+                numberOfTags = checkedState.values.count { it },
+                showSearchScreen = showSearchScreen,
+                onUpClick = { showSearchScreen = false },
+                enteredText = { textFromSearch = it },
+                textFromSearch = textFromSearch,
+                onTheClearFieldClick = { textFromSearch = "" }
             )
         },
         bottomBar = {
@@ -145,9 +147,7 @@ fun CatalogScreen(
             )
         },
     ) { innerPadding ->
-//    var statesForChecked by remember {
-//        mutableStateOf<List<Boolean>>(mutableListOf())
-//    }
+        //FIXME: вывести в отдельную composable функцию
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -156,12 +156,12 @@ fun CatalogScreen(
                 sheetState = sheetState,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("Подобрать блюда", modifier = Modifier.align(Alignment.CenterHorizontally))
-                    LazyColumn(
-                        Modifier.padding(
-                        start = 10.dp, end = 10.dp,
-                        top = 10.dp, bottom = 40.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp,)) {
+                    Text(text = "Подобрать блюда",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(500),
+                        modifier = Modifier.align(Alignment.Start))
+                    LazyColumn(Modifier.padding(top = 10.dp)) {
                         if (tags is TagUiState.Success) {
 
                             itemsIndexed(tags.tags) {index, tag ->
@@ -181,25 +181,40 @@ fun CatalogScreen(
                             }
                         }
                     }
+                    Button(onClick = { showBottomSheet = false },
+                        shape = MaterialTheme.shapes.small,
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Color(0xFFF15412),
+                            contentColor = MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier.fillMaxWidth().
+                            padding(top = 10.dp, bottom = 40.dp)) {
+                        Text("Готово")
+                    }
                 }
             }
         }
 
         Column(modifier = Modifier.padding(innerPadding)) {
             // Лист с категориями
-            ListItemCategories(
-                uiState = categories,
-                currentCategory = currentCategory,
-                onCategoryClick = onCategoryClick,
-                modifier = Modifier
-                    .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
-            )
+            if (!showSearchScreen) {
+                ListItemCategories(
+                    uiState = categories,
+                    currentCategory = currentCategory,
+                    onCategoryClick = onCategoryClick,
+                    modifier = Modifier
+                        .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
+                )
+            }
+
             // Сетка с продуктами
             ItemList(
                 uiState = products,
                 currentCategory = currentCategory,
                 checkedState = checkedState,
                 columns = columns,
+                showSearchScreen,
+                textFromSearch,
                 onCardClick = onProductClick,
                 onAddClick = onAddProductClick,
                 onRemoveClick = onRemoveProductClick,
@@ -214,46 +229,88 @@ fun CatalogTopAppBar(
     onFilterClick: () -> Unit,
     onSearchClick: () -> Unit,
     numberOfTags: Int,
+    showSearchScreen: Boolean,
+    enteredText: (String) -> Unit,
+    onUpClick: () -> Unit,
+    textFromSearch: String,
+    onTheClearFieldClick: () -> Unit,
 ) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 8.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        val textMeasurer = rememberTextMeasurer()
-        IconButton(
-            onClick = onFilterClick,
-            modifier = Modifier
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.filter),
-                contentDescription = stringResource(R.string.filter_button_description)
-            )
-            if (numberOfTags > 0) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    translate(left = 23f, top = -23f) {
-                        drawCircle(Color(0xFFF15412), radius = 7.dp.toPx())
-                    }
-                    translate(left = 70f, top = 14f) {
-                        drawText(textMeasurer, "$numberOfTags", style = TextStyle(fontSize = 11.sp, color = Color.White))
+        if (showSearchScreen) {
+            IconButton(onClick = onUpClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(com.example.ui.R.string.button_up_description)
+                )
+            }
+
+            TextField(
+                value = textFromSearch,
+                onValueChange = enteredText,
+                maxLines = 2,
+                placeholder = { Text("Найти блюдо") },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ))
+
+            if (textFromSearch != "") {
+                IconButton(onClick = onTheClearFieldClick) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.cancel),
+                        contentDescription = stringResource(com.example.ui.R.string.button_up_description)
+                    )
+                }
+            }
+
+        } else {
+            val textMeasurer = rememberTextMeasurer()
+            IconButton(
+                onClick = onFilterClick,
+                modifier = Modifier
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.filter),
+                    contentDescription = stringResource(R.string.filter_button_description)
+                )
+                if (numberOfTags > 0) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        translate(left = 23f, top = -23f) {
+                            drawCircle(Color(0xFFF15412), radius = 7.dp.toPx())
+                        }
+                        translate(left = 70f, top = 14f) {
+                            drawText(
+                                textMeasurer,
+                                "$numberOfTags",
+                                style = TextStyle(fontSize = 11.sp, color = Color.White)
+                            )
+                        }
                     }
                 }
             }
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Image(
-            painter = painterResource(R.drawable.logo),
-            contentDescription ="logo",
-            modifier = Modifier
-                .size(70.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(
-            onClick = onSearchClick
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.search),
-                contentDescription = stringResource(R.string.search_button_description)
+            Spacer(modifier = Modifier.weight(1f))
+            Image(
+                painter = painterResource(R.drawable.logo),
+                contentDescription = "logo",
+                modifier = Modifier
+                    .size(70.dp)
             )
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = onSearchClick
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = stringResource(R.string.search_button_description)
+                )
+            }
         }
     }
 }
@@ -290,6 +347,8 @@ fun ItemList(
     currentCategory: Category?,
     checkedState: Map<Int, Boolean>,
     columns: GridCells,
+    showSearchScreen: Boolean,
+    textFromSearch: String,
     onCardClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
     onRemoveClick: (Product) -> Unit,
@@ -304,17 +363,28 @@ fun ItemList(
             EmptyScreen(message = stringResource(R.string.empty_screen_message))
         }
         is ProductsUiState.Success -> {
-            var products = currentCategory?.let { category ->
-                uiState.product.filterKeys {
-                    it.category_id == category.id
+            var products = uiState.product
+            if (showSearchScreen) {
+                if (textFromSearch == "") {
+                    products = mapOf()
+                } else {
+                    products = products.filterKeys {
+                        it.name.lowercase().contains(textFromSearch.lowercase())
+                    }
                 }
-            } ?: uiState.product
+            } else {
+                products = currentCategory?.let { category ->
+                    uiState.product.filterKeys {
+                        it.category_id == category.id
+                    }
+                } ?: uiState.product
 
-            if (checkedState.values.contains(true)) {
-                products = products.filterKeys {
-                    if (it.tag_ids.isEmpty()) {
-                        false
-                    } else it.tag_ids.any { item -> checkedState[item]!! }
+                if (checkedState.values.contains(true)) {
+                    products = products.filterKeys {
+                        if (it.tag_ids.isEmpty()) {
+                            false
+                        } else it.tag_ids.any { item -> checkedState[item]!! }
+                    }
                 }
             }
 
@@ -477,7 +547,6 @@ fun ListItemCategories(
                 modifier = modifier.padding(bottom = 8.dp)
             ) {
                 itemsIndexed(categoriesList) { index, category ->
-                    // FIXME: Убрать обводку
                     FilterChip(
                         selected = category == currentCategory,
                         onClick = { onCategoryClick(category) },
@@ -496,6 +565,7 @@ fun ListItemCategories(
                             enabled = false,
                             selected = false,
                             borderColor = Color.Transparent,
+                            disabledBorderColor = Color.Transparent,
                             borderWidth = dimensionResource(id = com.example.ui.R.dimen.zero)
                         ),
                         elevation = FilterChipDefaults.filterChipElevation(
