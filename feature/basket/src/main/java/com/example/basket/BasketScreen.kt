@@ -109,8 +109,9 @@ private fun BasketTopAppBar(
         },
         navigationIcon = {
             IconButton(onClick = onUpClick) {
+                //FIXME: изменить цвет стрелки на оранжевый, как в фигме
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(id = com.example.ui.R.drawable.arrowleft),
                     contentDescription = stringResource(com.example.ui.R.string.button_up_description)
                 )
             }

@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.res.dimensionResource
@@ -156,7 +157,9 @@ fun CatalogScreen(
                 sheetState = sheetState,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(start = 15.dp, end = 15.dp,)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp,)) {
                     Text(text = "Подобрать блюда",
                         fontSize = 20.sp,
                         fontWeight = FontWeight(500),
@@ -187,8 +190,9 @@ fun CatalogScreen(
                             containerColor = Color(0xFFF15412),
                             contentColor = MaterialTheme.colorScheme.surface
                         ),
-                        modifier = Modifier.fillMaxWidth().
-                            padding(top = 10.dp, bottom = 40.dp)) {
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, bottom = 40.dp)) {
                         Text("Готово")
                     }
                 }
@@ -235,14 +239,14 @@ fun CatalogTopAppBar(
     textFromSearch: String,
     onTheClearFieldClick: () -> Unit,
 ) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
+    Row(modifier = Modifier.fillMaxWidth()
         .padding(start = 8.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically) {
         if (showSearchScreen) {
             IconButton(onClick = onUpClick) {
+                //FIXME: изменить цвет стрелки на оранжевый, как в фигме
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(id = com.example.ui.R.drawable.arrowleft),
                     contentDescription = stringResource(com.example.ui.R.string.button_up_description)
                 )
             }
