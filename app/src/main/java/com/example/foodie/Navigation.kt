@@ -1,5 +1,12 @@
 package com.example.foodie
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -25,15 +32,19 @@ fun Navigation(
     NavHost(
         navController = navController,
         startDestination = SPLASH_SCREEN,
+        enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() },
     ) {
-        composable(SPLASH_SCREEN) {
+        composable(route = SPLASH_SCREEN) {
             SplashScreen(
                 popBackStack = { navController.popBackStack() },
                 navigate = { navController.navigate(CATALOG_SCREEN) }
             )
         }
 
-        composable(CATALOG_SCREEN) {
+        composable(route = CATALOG_SCREEN) {
             CatalogRoute(
                 columns = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     GridCells.Fixed(4)
@@ -46,8 +57,7 @@ fun Navigation(
             )
         }
 
-        composable(
-            route = "$CARD_PRODUCT_SCREEN/{$PRODUCT_ID_ARGUMENT}",
+        composable(route = "$CARD_PRODUCT_SCREEN/{$PRODUCT_ID_ARGUMENT}",
             // запись при получении аргумента в Bundle
             arguments = listOf(navArgument(PRODUCT_ID_ARGUMENT) {
                 type = NavType.IntType
@@ -60,7 +70,7 @@ fun Navigation(
             )
         }
 
-        composable(BASKET_SCREEN) {
+        composable(route = BASKET_SCREEN) {
             BasketRoute(
                 onUpClick = navController::navigateUp,
             )

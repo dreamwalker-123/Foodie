@@ -1,5 +1,14 @@
 package com.example.catalog
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,8 +28,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,9 +53,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -117,9 +124,8 @@ fun CatalogScreen(
     onTagClicked: (Int) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState()
-//    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    var showSearchScreen by remember { mutableStateOf(false) }
+    var isVisibleSearchScreen by remember { mutableStateOf(false) }
     var textFromSearch by remember { mutableStateOf("") }
 
     Scaffold(
@@ -127,10 +133,10 @@ fun CatalogScreen(
             // Topline на фигне
             CatalogTopAppBar(
                 onFilterClick = { showBottomSheet = true },
-                onSearchClick = { showSearchScreen = true },
+                onSearchClick = { isVisibleSearchScreen = true },
                 numberOfTags = checkedState.values.count { it },
-                showSearchScreen = showSearchScreen,
-                onUpClick = { showSearchScreen = false },
+                isVisibleSearchScreen = isVisibleSearchScreen,
+                onUpClick = { isVisibleSearchScreen = false },
                 enteredText = { textFromSearch = it },
                 textFromSearch = textFromSearch,
                 onTheClearFieldClick = { textFromSearch = "" }
@@ -148,7 +154,7 @@ fun CatalogScreen(
             )
         },
     ) { innerPadding ->
-        //FIXME: вывести в отдельную composable функцию
+        // FIXME: вывести в отдельную composable функцию
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -199,16 +205,28 @@ fun CatalogScreen(
             }
         }
 
+        val density = LocalDensity.current
         Column(modifier = Modifier.padding(innerPadding)) {
             // Лист с категориями
-            if (!showSearchScreen) {
-                ListItemCategories(
-                    uiState = categories,
-                    currentCategory = currentCategory,
-                    onCategoryClick = onCategoryClick,
-                    modifier = Modifier
-                        .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
-                )
+            AnimatedVisibility(
+                visible = !isVisibleSearchScreen,
+                enter = slideInVertically {
+                    with(density) { -40.dp.roundToPx() }
+                } + expandVertically(
+                    expandFrom = Alignment.Top
+                ) + fadeIn(initialAlpha = 0.3f),
+                exit = slideOutVertically { with(density) { -40.dp.roundToPx() }
+                } + shrinkVertically() + fadeOut(targetAlpha = 0.3f)
+            ) {
+                Column {
+                    ListItemCategories(
+                        uiState = categories,
+                        currentCategory = currentCategory,
+                        onCategoryClick = onCategoryClick,
+                        modifier = Modifier
+                            .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
+                    )
+                }
             }
 
             // Сетка с продуктами
@@ -217,8 +235,8 @@ fun CatalogScreen(
                 currentCategory = currentCategory,
                 checkedState = checkedState,
                 columns = columns,
-                showSearchScreen,
-                textFromSearch,
+                isVisibleSearchScreen = isVisibleSearchScreen,
+                textFromSearch = textFromSearch,
                 onCardClick = onProductClick,
                 onAddClick = onAddProductClick,
                 onRemoveClick = onRemoveProductClick,
@@ -233,87 +251,105 @@ fun CatalogTopAppBar(
     onFilterClick: () -> Unit,
     onSearchClick: () -> Unit,
     numberOfTags: Int,
-    showSearchScreen: Boolean,
+    isVisibleSearchScreen: Boolean,
     enteredText: (String) -> Unit,
     onUpClick: () -> Unit,
     textFromSearch: String,
     onTheClearFieldClick: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth()
-        .padding(start = 8.dp, end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically) {
-        if (showSearchScreen) {
-            IconButton(onClick = onUpClick) {
-                //FIXME: изменить цвет стрелки на оранжевый, как в фигме
-                Icon(
-                    painter = painterResource(id = com.example.ui.R.drawable.arrowleft),
-                    contentDescription = stringResource(com.example.ui.R.string.button_up_description)
-                )
-            }
+    // FIXME: можно настроить более интересную анимацию, а не просто дефолтную FadeIn FadeOut
+    // FIXME: специально настроил замедленную анимацию, чтобы было заметно ее наличие
+    Crossfade(targetState = isVisibleSearchScreen,
+        label = "Crossfade of CatalogTopAppBar",
+        animationSpec = tween(durationMillis = 500),
+    ) { screen ->
+        when(screen) {
+            true -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onUpClick) {
+                        //FIXME: изменить цвет стрелки на оранжевый, как в фигме
+                        Icon(
+                            painter = painterResource(id = com.example.ui.R.drawable.arrowleft),
+                            contentDescription = stringResource(com.example.ui.R.string.button_up_description)
+                        )
+                    }
 
-            TextField(
-                value = textFromSearch,
-                onValueChange = enteredText,
-                maxLines = 2,
-                placeholder = { Text("Найти блюдо") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    disabledContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                ))
-
-            if (textFromSearch != "") {
-                IconButton(onClick = onTheClearFieldClick) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cancel),
-                        contentDescription = stringResource(com.example.ui.R.string.button_up_description)
+                    TextField(
+                        value = textFromSearch,
+                        onValueChange = enteredText,
+                        maxLines = 2,
+                        placeholder = { Text("Найти блюдо") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        )
                     )
-                }
-            }
 
-        } else {
-            val textMeasurer = rememberTextMeasurer()
-            IconButton(
-                onClick = onFilterClick,
-                modifier = Modifier
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.filter),
-                    contentDescription = stringResource(R.string.filter_button_description)
-                )
-                if (numberOfTags > 0) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        translate(left = 23f, top = -23f) {
-                            drawCircle(Color(0xFFF15412), radius = 7.dp.toPx())
-                        }
-                        translate(left = 70f, top = 14f) {
-                            drawText(
-                                textMeasurer,
-                                "$numberOfTags",
-                                style = TextStyle(fontSize = 11.sp, color = Color.White)
+                    if (textFromSearch != "") {
+                        IconButton(onClick = onTheClearFieldClick) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.cancel),
+                                contentDescription = stringResource(com.example.ui.R.string.button_up_description)
                             )
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Image(
-                painter = painterResource(R.drawable.logo),
-                contentDescription = "logo",
-                modifier = Modifier
-                    .size(70.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = onSearchClick
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = stringResource(R.string.search_button_description)
-                )
+            false-> {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    val textMeasurer = rememberTextMeasurer()
+                    IconButton(
+                        onClick = onFilterClick,
+                        modifier = Modifier
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.filter),
+                            contentDescription = stringResource(R.string.filter_button_description)
+                        )
+                        if (numberOfTags > 0) {
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                translate(left = 23f, top = -23f) {
+                                    drawCircle(Color(0xFFF15412), radius = 7.dp.toPx())
+                                }
+                                translate(left = 70f, top = 14f) {
+                                    drawText(
+                                        textMeasurer,
+                                        "$numberOfTags",
+                                        style = TextStyle(fontSize = 11.sp, color = Color.White)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Image(
+                        painter = painterResource(R.drawable.logo),
+                        contentDescription = "logo",
+                        modifier = Modifier
+                            .size(70.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = onSearchClick
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.search),
+                            contentDescription = stringResource(R.string.search_button_description)
+                        )
+                    }
+                }
             }
         }
     }
@@ -351,7 +387,7 @@ fun ItemList(
     currentCategory: Category?,
     checkedState: Map<Int, Boolean>,
     columns: GridCells,
-    showSearchScreen: Boolean,
+    isVisibleSearchScreen: Boolean,
     textFromSearch: String,
     onCardClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
@@ -368,7 +404,7 @@ fun ItemList(
         }
         is ProductsUiState.Success -> {
             var products = uiState.product
-            if (showSearchScreen) {
+            if (isVisibleSearchScreen) {
                 if (textFromSearch == "") {
                     products = mapOf()
                 } else {
@@ -424,7 +460,7 @@ private fun ProductCard(
     onClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
     onRemoveClick: (Product) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         shape = MaterialTheme.shapes.small,
