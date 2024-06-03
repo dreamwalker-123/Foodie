@@ -5,8 +5,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 //test {
@@ -21,9 +21,9 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
-    testImplementation("org.mockito:mockito-core:4.0.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+//    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 
     // DI Hilt for Kotlin library
     implementation(libs.hilt.core)

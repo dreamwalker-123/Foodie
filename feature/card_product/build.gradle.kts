@@ -11,6 +11,8 @@ android {
 
     defaultConfig {
         minSdk = 24
+        // удалить если не будет тестов
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -53,7 +55,7 @@ dependencies {
     // DI Hilt for Kotlin library
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
-    implementation(libs.androidx.junit.ktx)
+//    implementation(libs.androidx.junit.ktx)
     ksp(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.ui.tooling)

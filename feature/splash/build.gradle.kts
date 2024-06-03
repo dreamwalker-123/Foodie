@@ -9,6 +9,8 @@ android {
 
     defaultConfig {
         minSdk = 24
+        // удалить если не будет тестов
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -46,7 +48,7 @@ dependencies {
 
     //Lottie
     implementation (libs.lottie.compose)
-    implementation(libs.androidx.junit.ktx)
+//    implementation(libs.androidx.junit.ktx)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

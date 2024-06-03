@@ -16,6 +16,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -30,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -73,5 +74,14 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     // Test
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.navigation.testing)
+
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

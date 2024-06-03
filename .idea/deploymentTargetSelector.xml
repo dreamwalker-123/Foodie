@@ -13,6 +13,21 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
+      <SelectionState runConfigName="listItemCategories_IsDisplayed_()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="CatalogScreenTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="ExampleInstrumentedTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="listItemCategories_isFocused()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="listItemCategories_and_ItemList_IsDisplayed_()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

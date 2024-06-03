@@ -56,9 +56,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -110,18 +112,18 @@ fun CatalogRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
-    products: ProductsUiState,
-    categories: CategoriesUiState,
-    currentCategory: Category?,
-    tags: TagUiState,
-    checkedState: Map<Int, Boolean>,
-    columns: GridCells,
-    onBasketClick: () -> Unit,
-    onCategoryClick: (Category) -> Unit,
-    onProductClick: (Int) -> Unit,
-    onAddProductClick: (Product) -> Unit,
-    onRemoveProductClick: (Product) -> Unit,
-    onTagClicked: (Int) -> Unit,
+    products: ProductsUiState = ProductsUiState.Loading,
+    categories: CategoriesUiState = CategoriesUiState.Loading,
+    currentCategory: Category? = null,
+    tags: TagUiState = TagUiState.Loading,
+    checkedState: Map<Int, Boolean> = mapOf<Int, Boolean>(),
+    columns: GridCells = GridCells.Fixed(2),
+    onBasketClick: () -> Unit = {},
+    onCategoryClick: (Category) -> Unit = {},
+    onProductClick: (Int) -> Unit = {},
+    onAddProductClick: (Product) -> Unit = {},
+    onRemoveProductClick: (Product) -> Unit = {},
+    onTagClicked: (Int) -> Unit = {},
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -225,6 +227,7 @@ fun CatalogScreen(
                         onCategoryClick = onCategoryClick,
                         modifier = Modifier
                             .padding(top = dimensionResource(id = R.dimen.categories_chips_padding_top))
+                            .testTag("ListItemCategories"),
                     )
                 }
             }
@@ -240,6 +243,7 @@ fun CatalogScreen(
                 onCardClick = onProductClick,
                 onAddClick = onAddProductClick,
                 onRemoveClick = onRemoveProductClick,
+                modifier = Modifier.testTag("ItemList_or_LazyVerticalGrid"),
             )
         }
     }
@@ -392,6 +396,7 @@ fun ItemList(
     onCardClick: (Int) -> Unit,
     onAddClick: (Product) -> Unit,
     onRemoveClick: (Product) -> Unit,
+    modifier: Modifier,
 ) {
     when(uiState) {
         is ProductsUiState.Loading -> {
@@ -403,6 +408,8 @@ fun ItemList(
             EmptyScreen(message = stringResource(R.string.empty_screen_message))
         }
         is ProductsUiState.Success -> {
+            // фильтровка продуктов, если находимся в "поисковом" экране,
+            // то такая логика, если нет, то else
             var products = uiState.product
             if (isVisibleSearchScreen) {
                 if (textFromSearch == "") {
@@ -434,7 +441,7 @@ fun ItemList(
                     columns = columns,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+                    modifier = modifier.padding(start = 16.dp, end = 16.dp)
                 ) {
                     items(products.keys.toList()) { product ->
                         ProductCard(
