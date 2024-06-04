@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.foodie.utilities.MainTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -71,6 +71,7 @@ dependencies {
 
     // DI with hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.runner)
     ksp(libs.hilt.android.compiler)
 
     // Test
@@ -80,7 +81,13 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    // for TestNavHostController
     androidTestImplementation(libs.androidx.navigation.testing)
+
+    // Hilt Testing for instrumented tests.
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
+    // ...with Kotlin.
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.51.1")
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

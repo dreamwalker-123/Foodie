@@ -25,7 +25,7 @@ class MainActivity: ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(windowSizeClass)
+                    Navigation(windowSizeClass.widthSizeClass)
                 }
             }
         }

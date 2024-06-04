@@ -1,14 +1,10 @@
 package com.example.foodie
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -26,7 +22,7 @@ import com.example.splash.SplashScreen
 
 @Composable
 fun Navigation(
-    windowSizeClass: WindowSizeClass,
+    windowSizeClass: WindowWidthSizeClass,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
@@ -46,12 +42,13 @@ fun Navigation(
 
         composable(route = CATALOG_SCREEN) {
             CatalogRoute(
-                columns = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                columns = if (windowSizeClass == WindowWidthSizeClass.Expanded) {
                     GridCells.Fixed(4)
                 } else {
                     GridCells.Fixed(2)
                 },
-                // передача аргумента и также одновременно происходит запись аргумента в Bundle
+                // передача аргумента в CARD_PRODUCT_SCREEN и также
+                // одновременно происходит запись аргумента в Bundle
                 onProductClick = { navController.navigate("$CARD_PRODUCT_SCREEN/${it}") },
                 onBasketClick = { navController.navigate(BASKET_SCREEN)}
             )
@@ -66,7 +63,7 @@ fun Navigation(
         ) {
             CardProductRoute(
                 onUpClick = navController::navigateUp,
-                shouldShowExpandedLayout = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded,
+                shouldShowExpandedLayout = windowSizeClass == WindowWidthSizeClass.Expanded,
             )
         }
 
@@ -78,6 +75,6 @@ fun Navigation(
     }
 }
 
-private const val CATALOG_SCREEN = "CatalogScreen"
-private const val BASKET_SCREEN = "BasketScreen"
-private const val SPLASH_SCREEN = "SplashScreen"
+internal const val CATALOG_SCREEN = "CatalogScreen"
+internal const val BASKET_SCREEN = "BasketScreen"
+internal const val SPLASH_SCREEN = "SplashScreen"
