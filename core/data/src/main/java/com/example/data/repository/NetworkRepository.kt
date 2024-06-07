@@ -4,9 +4,7 @@ import com.example.data.utils.asInternalModel
 import com.example.model.Category
 import com.example.model.Product
 import com.example.model.Tag
-import com.example.network.RetrofitClient
-import com.example.network.model.NetworkCategory
-import com.example.network.model.NetworkProduct
+import com.example.network.retrofit.RetrofitClient
 import com.example.runtime.Cart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

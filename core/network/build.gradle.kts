@@ -17,6 +17,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
 
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0-RC")
+
     // DI Hilt for Kotlin library
     implementation(libs.hilt.core)
     ksp(libs.hilt.compiler)

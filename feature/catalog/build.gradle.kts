@@ -54,32 +54,19 @@ dependencies {
     // DI Hilt for Kotlin library
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
-//    implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.media3.common)
     ksp(libs.hilt.compiler)
 
     // из нового проекта
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-//    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // UnitTesting
-//    testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:4.0.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
-    // Android Ui Testing
-//    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-//    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-//    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-//    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-//
-//    debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-//    debugImplementation(libs.androidx.ui.tooling)
-//    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

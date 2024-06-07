@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NetworkCategory(
-    val id: Int,
-    val name: String
+    val id: Int = 0,
+    val name: String = "Парам пам пам"
 )

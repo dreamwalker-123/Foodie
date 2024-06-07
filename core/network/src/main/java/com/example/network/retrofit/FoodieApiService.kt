@@ -1,5 +1,6 @@
-package com.example.network
+package com.example.network.retrofit
 
+import com.example.network.FoodieApi
 import com.example.network.model.NetworkCategory
 import com.example.network.model.NetworkProduct
 import com.example.network.model.NetworkTag
@@ -11,16 +12,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RetrofitClient @Inject constructor(): FoodieApi {
-
-    private val baseUrl =
-        "https://anika1d.github.io/WorkTestServer/"
-
-    private var json = Json { ignoreUnknownKeys = true }
+class RetrofitClient @Inject constructor(
+    networkJson: Json,
+): FoodieApi {
 
     private val retrofit = Retrofit.Builder()
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .baseUrl(baseUrl)
+        .addConverterFactory(networkJson.asConverterFactory("application/json".toMediaType()))
+        .baseUrl("https://anika1d.github.io/WorkTestServer/")
         .build()
         .create(FoodieApi::class.java)
 
