@@ -14,10 +14,12 @@
 
 Скриншоты:
 1. Lottie Screen
+
 ![1](https://github.com/dreamwalker-123/Foodie/assets/125174202/c4fbc216-ecee-438a-ab15-d4ae8846fa48)
 
 
 2. Catalog Screen
+
 ![2](https://github.com/dreamwalker-123/Foodie/assets/125174202/c9a9845e-f60b-4e18-b0cb-1a6b565df76b)
 ![3](https://github.com/dreamwalker-123/Foodie/assets/125174202/608566b5-3ba2-48cb-bbf6-fa648b6437a8)
 ![4](https://github.com/dreamwalker-123/Foodie/assets/125174202/7def761d-bc75-402c-aa98-7ae85a7f547c)
@@ -25,14 +27,17 @@
 
 
 3. Card of product Screen
+
 ![6](https://github.com/dreamwalker-123/Foodie/assets/125174202/e8c40113-c05f-4141-bb8b-16cb23e757b4)
 
 
 4. Basket Screen
+
 ![7](https://github.com/dreamwalker-123/Foodie/assets/125174202/e1fbf4af-2d44-4d67-8702-dfb45c685dae)
 
 
 5. Search Screen
+
 ![8](https://github.com/dreamwalker-123/Foodie/assets/125174202/2971638a-4e0c-41b2-9659-67efd4f66c04)
 ![9](https://github.com/dreamwalker-123/Foodie/assets/125174202/040ef10f-06a4-43a8-9fe2-e5dd5e46335d)
 
