@@ -58,7 +58,7 @@ class CatalogViewModel @Inject constructor(
         initialValue = ProductsUiState.Loading
     )
 
-    fun getCategories() {
+    private fun getCategories() {
         viewModelScope.launch {
             networkRepository.getCategories()
                 .onSuccess {
@@ -74,7 +74,7 @@ class CatalogViewModel @Inject constructor(
         }
     }
 
-    fun getTags() {
+    private fun getTags() {
         viewModelScope.launch {
             networkRepository.getTags()
                 .onSuccess {
